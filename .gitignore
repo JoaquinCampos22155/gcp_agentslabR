@@ -1,0 +1,8 @@
+.pytest-tmp/
+.pytest_cache/
+__pycache__/
+infra/.build/
+infra/terraform.tfvars
+infra/.terraform/
+infra/*.tfstate*
+simulator/requests.csv

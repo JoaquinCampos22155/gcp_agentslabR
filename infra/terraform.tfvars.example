@@ -1,0 +1,5 @@
+project_id = "REPLACE_WITH_YOUR_GCP_PROJECT_ID"
+region = "us-central1"
+function_name = "orders-api"
+failure_rate = 0.02
+student_members = []
