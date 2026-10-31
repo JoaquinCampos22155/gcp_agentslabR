@@ -36,14 +36,24 @@ async def send(client, target_url, scheduled_at_min, invalid_share, scenario):
     request_id = str(uuid.uuid4())
     operation, payload, invalid = choose_request(scheduled_at_min, invalid_share, scenario["scenarios"])
     url = target_url.rstrip("/") + "/orders"
+    order_ids = scenario.setdefault("order_ids", [])
+    order_id = order_ids[-1] if order_ids and not invalid else "missing-order"
     if operation == "get":
-        url += "/missing-order"
+        url += f"/{order_id}"
     elif operation == "cancel":
-        url += "/missing-order/cancel"
+        url += f"/{order_id}/cancel"
     if invalid:
         payload = {"category": payload["category"]}
     started = time.perf_counter()
-    response = await client.post(url, json=payload, headers={"X-Request-ID": request_id})
+    headers = {"X-Request-ID": request_id}
+    if operation == "get":
+        response = await client.get(url, headers=headers)
+    else:
+        response = await client.post(url, json=payload, headers=headers)
+    if operation == "create" and response.status_code == 201:
+        created_id = response.json().get("order_id")
+        if created_id:
+            order_ids.append(created_id)
     return {"request_id": request_id, "scheduled_at_min": scheduled_at_min, "sent_at": time.time(), "operation": operation, "intentional_event": "invalid_payload" if invalid else "valid", "status_code": response.status_code, "client_latency_ms": round((time.perf_counter() - started) * 1000, 2)}
 
 

@@ -1,6 +1,9 @@
+import asyncio
 import csv
+import time
 from pathlib import Path
 
+import simulator.simulator as simulator
 from simulator.simulator import build_schedule, choose_request, write_results
 
 
@@ -24,3 +27,42 @@ def test_scenario_doubles_invalid_probability_for_matching_category():
     assert operation in {"create", "get", "cancel"}
     assert invalid is True
     assert payload["category"] == "electronics"
+
+
+def test_send_uses_get_for_order_lookup(monkeypatch):
+    class Client:
+        def __init__(self):
+            self.get_calls = []
+            self.post_calls = []
+
+        async def get(self, url, headers):
+            self.get_calls.append((url, headers))
+            return type("Response", (), {"status_code": 404})()
+
+        async def post(self, url, json, headers):
+            self.post_calls.append((url, json, headers))
+            return type("Response", (), {"status_code": 201})()
+
+    monkeypatch.setattr(simulator, "choose_request", lambda *_: ("get", {"customer_tier": "gold"}, False))
+    client = Client()
+    row = asyncio.run(simulator.send(client, "https://example.test", 0, 0.08, {"started": time.monotonic(), "scenarios": []}))
+
+    assert row["status_code"] == 404
+    assert client.get_calls[0][0] == "https://example.test/orders/missing-order"
+    assert client.post_calls == []
+
+
+def test_send_uses_a_created_order_for_valid_lookup(monkeypatch):
+    class Client:
+        async def get(self, url, headers):
+            self.url = url
+            return type("Response", (), {"status_code": 200})()
+
+        async def post(self, url, json, headers):
+            raise AssertionError("A lookup must not use POST")
+
+    monkeypatch.setattr(simulator, "choose_request", lambda *_: ("get", {"customer_tier": "gold"}, False))
+    client = Client()
+    asyncio.run(simulator.send(client, "https://example.test", 0, 0.08, {"started": time.monotonic(), "scenarios": [], "order_ids": ["created-123"]}))
+
+    assert client.url == "https://example.test/orders/created-123"

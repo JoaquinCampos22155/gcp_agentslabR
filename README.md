@@ -12,7 +12,11 @@ Desde `infra/`, ejecuta `terraform init`, revisa el plan con `terraform plan`, y
 
 ## Observabilidad y tráfico
 
-Antes de ejecutar el simulador, crea métricas basadas en logs para `request_completed`, errores 4xx/5xx y latencia. En Cloud Monitoring crea un único dashboard con métricas nativas de la función, las métricas basadas en logs, paneles SQL de Log Analytics y un panel de logs. Después ejecuta `python simulator/simulator.py`; producirá `simulator/requests.csv`.
+Terraform crea antes del tráfico las métricas basadas en logs `orders_request_completed`, `orders_client_errors`, `orders_server_errors` y `orders_latency_ms`, además del dashboard `Observable Orders API`. El dashboard combina tasa nativa de Cloud Run, las métricas de logs y un panel con los logs estructurados. Abre el output `log_analytics_console` para ejecutar y graficar consultas SQL sobre la tabla indicada en `log_analytics_view`.
+
+La consulta reproducible para la gráfica de negocio está en `docs/log-analytics.sql`: agrupa solicitudes y latencia promedio por minuto, categoría y resultado. Después de ejecutarla en Log Analytics, usa **Chart** y agrégala al dashboard `Observable Orders API`.
+
+Actualiza `target_url` en `simulator/config.json` con el output `function_url` y ejecuta `python simulator/simulator.py`; producirá `simulator/requests.csv`.
 
 ## Validación local
 

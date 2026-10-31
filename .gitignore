@@ -5,4 +5,8 @@ infra/.build/
 infra/terraform.tfvars
 infra/.terraform/
 infra/*.tfstate*
+infra/tfplan*
 simulator/requests.csv
+simulator/config.local.json
+simulator/run_local.py
+simulator/simulator.*.log
