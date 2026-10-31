@@ -176,6 +176,7 @@ resource "google_monitoring_dashboard" "orders_api" {
             title = "Cloud Run request rate"
             xyChart = {
               dataSets = [{
+                plotType = "STACKED_AREA"
                 timeSeriesQuery = {
                   timeSeriesFilter = {
                     filter      = "metric.type=\"run.googleapis.com/request_count\" resource.type=\"cloud_run_revision\" resource.label.\"service_name\"=\"${var.function_name}\""
@@ -193,6 +194,7 @@ resource "google_monitoring_dashboard" "orders_api" {
             title = "Completed requests (logs)"
             xyChart = {
               dataSets = [{
+                plotType = "STACKED_AREA"
                 timeSeriesQuery = {
                   timeSeriesFilter = {
                     filter      = "metric.type=\"logging.googleapis.com/user/orders_request_completed\""
@@ -210,8 +212,8 @@ resource "google_monitoring_dashboard" "orders_api" {
             title = "4xx and 5xx responses (logs)"
             xyChart = {
               dataSets = [
-                { timeSeriesQuery = { timeSeriesFilter = { filter = "metric.type=\"logging.googleapis.com/user/orders_client_errors\"", aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE" } } } },
-                { timeSeriesQuery = { timeSeriesFilter = { filter = "metric.type=\"logging.googleapis.com/user/orders_server_errors\"", aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE" } } } }
+                { plotType = "STACKED_BAR", timeSeriesQuery = { timeSeriesFilter = { filter = "metric.type=\"logging.googleapis.com/user/orders_client_errors\"", aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE" } } } },
+                { plotType = "STACKED_BAR", timeSeriesQuery = { timeSeriesFilter = { filter = "metric.type=\"logging.googleapis.com/user/orders_server_errors\"", aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE" } } } }
               ]
               yAxis = { label = "errors/s", scale = "LINEAR" }
             }
@@ -223,6 +225,7 @@ resource "google_monitoring_dashboard" "orders_api" {
             title = "Backend latency p95 (logs)"
             xyChart = {
               dataSets = [{
+                plotType = "STACKED_AREA"
                 timeSeriesQuery = {
                   timeSeriesFilter = {
                     filter      = "metric.type=\"logging.googleapis.com/user/orders_latency_ms\""
