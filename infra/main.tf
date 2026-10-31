@@ -220,13 +220,13 @@ resource "google_monitoring_dashboard" "orders_api" {
         {
           xPos = 6, yPos = 4, width = 6, height = 4
           widget = {
-            title = "Backend latency (logs)"
+            title = "Backend latency p95 (logs)"
             xyChart = {
               dataSets = [{
                 timeSeriesQuery = {
                   timeSeriesFilter = {
                     filter      = "metric.type=\"logging.googleapis.com/user/orders_latency_ms\""
-                    aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_DELTA" }
+                    aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_PERCENTILE_95" }
                   }
                 }
               }]
